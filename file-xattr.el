@@ -60,8 +60,11 @@ unless optional argument NOERROR is set."
   "Return alist of attributes in OUTPUT."
   (let (attributes)
     (dolist (line (split-string output "\n" t) attributes)
-      (when (string-match "^\\([^=]+\\)=\\(.+\\)$" line)
-        (push (cons (match-string 1 line) (match-string 2 line)) attributes)))))
+      (cond
+       ((string-match "^# file: \\(.+\\)$" line)
+        (push (list (match-string 1 line)) attributes))
+       ((string-match "^\\([^=]+\\)=\\(.+\\)$" line)
+        (push (cons (match-string 1 line) (match-string 2 line)) (cdar attributes)))))))
 
 (defun file-xattr--insert-attributes (attributes)
   "Insert ATTRIBUTES into current buffer."
@@ -86,10 +89,10 @@ unless optional argument NOERROR is set."
    (file-xattr--parse-getfattr-output
     (file-xattr--execute-to-string file-xattr-getfattr-program (list "-n" attribute (expand-file-name filename))))))
 
-(defun file-xattr-list (filename)
-  "Return list of attributes on FILENAME."
+(defun file-xattr-list (filenames)
+  "Return list of attributes on FILENAMES."
   (file-xattr--parse-getfattr-output
-   (file-xattr--execute-to-string file-xattr-getfattr-program (list "-d" (expand-file-name filename)))))
+   (file-xattr--execute-to-string file-xattr-getfattr-program (list "-d" (mapconcat #'expand-file-name filenames " ")))))
 
 (defun file-xattr-remove (filename attribute)
   "Remove ATTRIBUTE from FILENAME."
@@ -101,7 +104,7 @@ unless optional argument NOERROR is set."
 
 (defun file-xattr-edit (filename)
   "Edit attributes of FILENAME."
-  (let ((attributes (file-xattr-list filename))
+  (let ((attributes (cdar (file-xattr-list (list filename))))
         (buffer (generate-new-buffer "xattr")))
     (with-current-buffer buffer
       (insert "# Edit attributes of selected file.\n"
@@ -128,7 +131,7 @@ unless optional argument NOERROR is set."
   "Save attributes back to file and quit editing."
   (interactive)
   (when (eq major-mode 'file-xattr-edit-mode)
-    (let ((attributes (file-xattr--parse-getfattr-output (buffer-string)))
+    (let ((attributes (cdar (file-xattr--parse-getfattr-output (buffer-string))))
           (filename file-xattr-edit-filename)
           (tempfile (make-temp-file "xattr.")))
       (dolist (attribute file-xattr-edit-attributes)

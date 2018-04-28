@@ -92,7 +92,7 @@ unless optional argument NOERROR is set."
 (defun file-xattr-list (filenames)
   "Return list of attributes on FILENAMES."
   (file-xattr--parse-getfattr-output
-   (file-xattr--execute-to-string file-xattr-getfattr-program (list "-d" (mapconcat #'expand-file-name filenames " ")))))
+   (file-xattr--execute-to-string file-xattr-getfattr-program `("-d" ,@(mapcar #'expand-file-name filenames)))))
 
 (defun file-xattr-remove (filename attribute)
   "Remove ATTRIBUTE from FILENAME."

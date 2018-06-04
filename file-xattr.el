@@ -1,8 +1,8 @@
 ;;; file-xattr.el --- Read and write extended file attributes on linux
 
-;; Copyright (C) 2015  David Maus
+;; Copyright (C) 2015,2018  David Maus
 
-;; Author: David Maus <dmaus@ictsoc.de>
+;; Author: David Maus <dmaus@dmaus.name>
 ;; Keywords: files
 
 ;; This file is NOT part of Emacs.

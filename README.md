@@ -1,9 +1,9 @@
-# file-xattr.el --- Read and write extended file attributes on linux
+# Read and write extended file attributes on linux
 
 A simple wrapper for getfattr/setfattr that provides access to
 extended file attributes on linux.
 
-(c) 2015 by David Maus <dmaus@ictsoc.de>
+(c) 2015,2018 by David Maus <dmaus@dmaus.name>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

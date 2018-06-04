@@ -36,6 +36,10 @@
   :type '(file :must-match t)
   :group 'file-xattr)
 
+(defface file-xattr-highlight-dired-face
+  '((t :weight bold :underline t))
+  "Face used to highlight files w/ xattr in dired.")
+
 (defvar file-xattr-hook-into-dired t)
 (defvar file-xattr-edit-dired-key (kbd "E"))
 
@@ -155,13 +159,25 @@ unless optional argument NOERROR is set."
   (define-key file-xattr-edit-mode-map (kbd "C-x C-s") #'file-xattr-edit-save))
 
 (defun file-xattr-hook-into-dired ()
-  (define-key dired-mode-map file-xattr-edit-dired-key #'file-xattr-edit-dired))
+  (define-key dired-mode-map file-xattr-edit-dired-key #'file-xattr-edit-dired)
+  (add-hook 'dired-after-readin-hook #'file-xattr-highlight-dired))
 
 (defun file-xattr-edit-dired ()
   (interactive)
   (let ((filename (dired-file-name-at-point)))
     (when filename
       (file-xattr-edit filename))))
+
+(defun file-xattr-highlight-dired ()
+  (save-excursion
+    (let ((inhibit-read-only t))
+      (goto-char (point-min))
+      (while (not (eobp))
+        (when (dired-file-name-at-point)
+          (let ((attrs (file-xattr-list (list (dired-file-name-at-point)))))
+            (when attrs
+              (put-text-property (point) (point-at-eol) 'font-lock-face 'file-xattr-highlight-dired-face))))
+        (dired-next-line 1)))))
 
 (when file-xattr-hook-into-dired
   (eval-after-load 'dired #'file-xattr-hook-into-dired))
